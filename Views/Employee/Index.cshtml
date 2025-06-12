@@ -1,0 +1,217 @@
+﻿@model List<Employee>
+
+@{
+    ViewData["Title"] = "Employees";
+
+    var selectedCompany = Context.Request.Query["company"].ToString();
+    var selectedStatus = Context.Request.Query["status"].ToString();
+    var searchTerm = Context.Request.Query["search"].ToString();
+    var pageSize = string.IsNullOrEmpty(Context.Request.Query["pageSize"]) ? 10 : int.Parse(Context.Request.Query["pageSize"]);
+    var page = string.IsNullOrEmpty(Context.Request.Query["page"]) ? 1 : int.Parse(Context.Request.Query["page"]);
+
+    var companies = ViewBag.Companies as SelectList;
+    var statuses = ViewBag.Status as SelectList;
+    int totalCount = ViewBag.TotalCount;
+    int totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+    int startRecord = ((page - 1) * pageSize) + 1;
+    int endRecord = Math.Min(startRecord + pageSize - 1, totalCount);
+    string currentSort = Context.Request.Query["sortField"];
+    string currentDir = Context.Request.Query["sortDirection"];
+    Func<string, string> nextDir = field =>
+        currentSort == field && currentDir == "asc" ? "desc" : "asc";
+}
+
+<h2 class="mt-3">Employees List</h2>
+<style>
+    .table-header-custom {
+        background-color: slategrey; 
+    }
+
+        .table-header-custom th,
+        .table-header-custom a {
+            color: white !important;
+        }
+
+            .table-header-custom a:hover {
+                text-decoration: underline;
+                color: #e0f7ff !important;
+            }
+
+        .table-header-custom i {
+            color: white;
+        }
+</style>
+
+
+
+
+<form method="get" action="/Employee/Index">
+    <div class="row mb-3">
+        <div class="col-md-3">
+            <label>Company</label>
+            @Html.DropDownList("company", companies, "-- All Companies --", new { @class = "form-control", onchange = "this.form.submit()" })
+        </div>
+        <div class="col-md-3">
+            <label>Status</label>
+            @Html.DropDownList("status", statuses, "-- All --", new { @class = "form-control", onchange = "this.form.submit()" })
+        </div>
+        <div class="col-md-6">
+            <label>Search</label>
+            <input type="text" id="searchBox" class="form-control" placeholder="Search by name, alias, or ICNO" />
+        </div>
+    </div>
+</form>
+
+<table class="table table-bordered table-striped" id="employeeTable">
+    <thead class="table-header-custom">
+        <tr>
+            <th>
+                <a class="text-decoration-none" style="color:#001f4d; cursor:pointer;"
+                   href="?sortField=EmpCode&sortDirection=@nextDir("EmpCode")&company=@selectedCompany&status=@selectedStatus&search=@searchTerm&pageSize=@pageSize">
+                    Code
+                    <i class="fa-solid @(currentSort == "EmpCode" ? (currentDir == "asc" ? "fa-sort-up" : "fa-sort-down") : "fa-sort text-secondary") ms-1"></i>
+                </a>
+            </th>
+            <th>
+                <a class="text-decoration-none" style="color:#001f4d; cursor:pointer;"
+                   href="?sortField=EmployeeName&sortDirection=@nextDir("EmployeeName")&company=@selectedCompany&status=@selectedStatus&search=@searchTerm&pageSize=@pageSize">
+                    Employee Name
+                    <i class="fa-solid @(currentSort == "EmployeeName" ? (currentDir == "asc" ? "fa-sort-up" : "fa-sort-down") : "fa-sort text-secondary") ms-1"></i>
+                </a>
+            </th>
+            <th>
+                <a class="text-decoration-none" style="color:#001f4d; cursor:pointer;"
+                   href="?sortField=AliasName&sortDirection=@nextDir("AliasName")&company=@selectedCompany&status=@selectedStatus&search=@searchTerm&pageSize=@pageSize">
+                    Alias Name
+                    <i class="fa-solid @(currentSort == "AliasName" ? (currentDir == "asc" ? "fa-sort-up" : "fa-sort-down") : "fa-sort text-secondary") ms-1"></i>
+                </a>
+            </th>
+            <th>
+                <a class="text-decoration-none" style="color:#001f4d; cursor:pointer;"
+                   href="?sortField=ICNO&sortDirection=@nextDir("ICNO")&company=@selectedCompany&status=@selectedStatus&search=@searchTerm&pageSize=@pageSize">
+                    NRIC/FIN No
+                    <i class="fa-solid @(currentSort == "ICNO" ? (currentDir == "asc" ? "fa-sort-up" : "fa-sort-down") : "fa-sort text-secondary") ms-1"></i>
+                </a>
+            </th>
+            <th>
+                <a class="text-decoration-none" style="color:#001f4d; cursor:pointer;"
+                   href="?sortField=SectionCode&sortDirection=@nextDir("SectionCode")&company=@selectedCompany&status=@selectedStatus&search=@searchTerm&pageSize=@pageSize">
+                    Section Code
+                    <i class="fa-solid @(currentSort == "SectionCode" ? (currentDir == "asc" ? "fa-sort-up" : "fa-sort-down") : "fa-sort text-secondary") ms-1"></i>
+                </a>
+            </th>
+            <th>
+                <a class="text-decoration-none" style="color:#001f4d; cursor:pointer;"
+                   href="?sortField=Department&sortDirection=@nextDir("Department")&company=@selectedCompany&status=@selectedStatus&search=@searchTerm&pageSize=@pageSize">
+                    Department
+                    <i class="fa-solid @(currentSort == "Department" ? (currentDir == "asc" ? "fa-sort-up" : "fa-sort-down") : "fa-sort text-secondary") ms-1"></i>
+                </a>
+            </th>
+            <th>
+                <a class="text-decoration-none" style="color:#001f4d; cursor:pointer;"
+                   href="?sortField=Designation&sortDirection=@nextDir("Designation")&company=@selectedCompany&status=@selectedStatus&search=@searchTerm&pageSize=@pageSize">
+                    Designation
+                    <i class="fa-solid @(currentSort == "Designation" ? (currentDir == "asc" ? "fa-sort-up" : "fa-sort-down") : "fa-sort text-secondary") ms-1"></i>
+                </a>
+            </th>
+            <th>
+                <a class="text-decoration-none" style="color:#001f4d; cursor:pointer;"
+                   href="?sortField=Status&sortDirection=@nextDir("Status")&company=@selectedCompany&status=@selectedStatus&search=@searchTerm&pageSize=@pageSize">
+                    Status
+                    <i class="fa-solid @(currentSort == "Status" ? (currentDir == "asc" ? "fa-sort-up" : "fa-sort-down") : "fa-sort text-secondary") ms-1"></i>
+                </a>
+            </th>
+        </tr>
+    </thead>
+
+    <tbody id="employeeTableBody">
+        @foreach (var emp in Model)
+        {
+            <tr>
+
+                <td>@emp.EmpCode</td>
+                <td>@emp.EmployeeName</td>
+                <td>@emp.AliasName</td>
+                <td>@emp.ICNO</td>
+                <td>@emp.SectionCode</td>
+                <td>@emp.Department?.Title</td>
+                <td>@emp.Designation?.Title</td>
+                <td>
+                    @{
+                        var status = string.IsNullOrEmpty(emp.ResignDate?.ToString()) || emp.ResignDate > DateTime.Today
+                        ? "Active"
+                        : "Resigned";
+                    }
+                    @status
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="row align-items-center mt-3">
+    <div class="col-md-4 text-start">
+        <strong>Showing @startRecord to @endRecord of @totalCount entries</strong>
+    </div>
+
+    <div class="col-md-4 text-center">
+        <form method="get" action="/Employee/Index" class="d-inline">
+            <input type="hidden" name="company" value="@selectedCompany" />
+            <input type="hidden" name="status" value="@selectedStatus" />
+            <input type="hidden" name="search" value="@searchTerm" />
+            <input type="hidden" name="page" value="1" />
+            <label class="me-1">Show:</label>
+            <select id="pageSize" name="pageSize" class="form-select form-select-sm d-inline-block w-auto" onchange="this.form.submit()">
+                @{
+                    var options = new[] { 10, 20, 50, 100 };
+                    foreach (var opt in options)
+                    {
+                        <option value="@opt" selected="@(pageSize == opt ? "selected" : null)">@opt</option>
+                    }
+                }
+            </select>
+            <span class="ms-1">entries per page</span>
+        </form>
+    </div>
+
+    <div class="col-md-4 text-end">
+        <nav aria-label="Page navigation">
+            <ul class="pagination pagination-sm justify-content-end mb-0">
+                <li class="page-item @(page <= 1 ? "disabled" : "")">
+                    <a class="page-link" href="?page=@(page - 1)&company=@selectedCompany&status=@selectedStatus&search=@searchTerm&pageSize=@pageSize">Prev</a>
+                </li>
+
+                @for (int i = 1; i <= totalPages; i++)
+                {
+                    <li class="page-item @(page == i ? "active" : "")">
+                        <a class="page-link" href="?page=@i&company=@selectedCompany&status=@selectedStatus&search=@searchTerm&pageSize=@pageSize">@i</a>
+                    </li>
+                }
+
+                <li class="page-item @(page >= totalPages ? "disabled" : "")">
+                    <a class="page-link" href="?page=@(page + 1)&company=@selectedCompany&status=@selectedStatus&search=@searchTerm&pageSize=@pageSize">Next</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchBox = document.getElementById('searchBox');
+        const rows = document.querySelectorAll('#employeeTableBody tr');
+
+        searchBox.addEventListener('keyup', function () {
+            const searchTerm = this.value.toLowerCase();
+
+            rows.forEach(row => {
+                const name = row.cells[1].innerText.toLowerCase();
+                const alias = row.cells[2].innerText.toLowerCase();
+                const icno = row.cells[3].innerText.toLowerCase();
+
+                const match = name.includes(searchTerm) || alias.includes(searchTerm) || icno.includes(searchTerm);
+                row.style.display = match ? '' : 'none';
+            });
+        });
+    });
+</script>
