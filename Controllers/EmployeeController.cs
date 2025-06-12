@@ -7,12 +7,11 @@ using EmployeeDataProject.Models;
 public class EmployeeController : Controller
 {
     private readonly InterviewTestContext _context;
-
+    //DI
     public EmployeeController(InterviewTestContext context)
     {
         _context = context;
     }
-    [HttpGet("Employee/Index")]
     public async Task<IActionResult> Index(string company = "", string status = "all", string search = "",
                                            string sortField = "EmpCode", string sortDirection = "asc",
                                            int page = 1, int pageSize = 10)
